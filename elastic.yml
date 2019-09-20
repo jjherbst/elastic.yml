@@ -1,0 +1,82 @@
+version: '3.6'
+services:
+  elasticsearch:
+    image: docker.elastic.co/elasticsearch/elasticsearch:7.3.2
+    container_name: elasticsearch
+    ports: ['9200:9200']
+    networks: ['esnet']
+    volumes:
+      - esdata1:/usr/share/elasticsearch/data:rw
+    environment:
+      - path.repo=/usr/share/elasticsearch/data
+      - cluster.name=docker-cluster
+      - node.name=elasticsearch
+      - cluster.initial_master_nodes=elasticsearch
+      - bootstrap.memory_lock=true
+      - http.cors.enabled=true
+      - http.cors.allow-origin=*
+      - "ES_JAVA_OPTS=-Xms512m -Xmx512m"
+      - discovery.seed_hosts=elasticsearch,elasticsearch2,elasticsearch3
+    ulimits:
+      memlock:
+        soft: -1
+        hard: -1
+  elasticsearch2:
+    image: docker.elastic.co/elasticsearch/elasticsearch:7.3.2
+    container_name: elasticsearch2
+    networks: ['esnet']
+    volumes:
+      - esdata2:/usr/share/elasticsearch/data:rw
+    environment:
+      - path.repo=/usr/share/elasticsearch/data
+      - cluster.name=docker-cluster
+      - node.name=elasticsearch2
+      - cluster.initial_master_nodes=elasticsearch,elasticsearch2
+      - bootstrap.memory_lock=true
+      - http.cors.enabled=true
+      - http.cors.allow-origin=*
+      - "ES_JAVA_OPTS=-Xms512m -Xmx512m"
+      - discovery.seed_hosts=elasticsearch,elasticsearch2,elasticsearch3
+    ulimits:
+      memlock:
+        soft: -1
+        hard: -1
+  elasticsearch3:
+    image: docker.elastic.co/elasticsearch/elasticsearch:7.3.2
+    container_name: elasticsearch3
+    networks: ['esnet']
+    volumes:
+      - esdata3:/usr/share/elasticsearch/data:rw
+    environment:
+      - path.repo=/usr/share/elasticsearch/data
+      - cluster.name=docker-cluster
+      - node.name=elasticsearch3
+      - cluster.initial_master_nodes=elasticsearch,elasticsearch2,elasticsearch3
+      - bootstrap.memory_lock=true
+      - http.cors.enabled=true
+      - http.cors.allow-origin=*
+      - "ES_JAVA_OPTS=-Xms512m -Xmx512m"
+      - discovery.seed_hosts=elasticsearch,elasticsearch2,elasticsearch3
+    ulimits:
+      memlock:
+        soft: -1
+        hard: -1
+  kibana:
+    image: docker.elastic.co/kibana/kibana:7.3.2
+    container_name: kibana
+    environment:
+      SERVER_NAME: kibana.local
+      ELASTICSEARCH_URL: http://elasticsearch:9200
+    ports:
+      - '5601:5601'
+    networks: ['esnet']
+volumes:
+  esdata1:
+    driver: local
+  esdata2:
+    driver: local
+  esdata3:
+    driver: local
+
+networks:
+  esnet:
